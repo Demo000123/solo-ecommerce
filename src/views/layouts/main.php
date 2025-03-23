@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $pageTitle ?? 'Solo E-commerce' ?></title>
-    <link rel="stylesheet" href="/public/css/styles.css">
-    <!-- Modern, clean UI using custom CSS -->
+    <!-- Base styles -->
     <style>
         :root {
             --primary-color: #3a86ff;
@@ -122,108 +121,12 @@
             background-color: #e0005c;
         }
         
-        .card {
-            background-color: var(--white);
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            overflow: hidden;
-            transition: var(--transition);
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-        }
-        
-        .card-img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-        
-        .card-body {
-            padding: 20px;
-        }
-        
-        .card-title {
-            font-size: 1.2rem;
-            margin-bottom: 10px;
+        h1 {
+            margin-bottom: 30px;
             color: var(--text-color);
         }
         
-        .card-price {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: var(--secondary-color);
-            margin-bottom: 15px;
-        }
-        
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-        }
-        
-        .product-detail {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-        }
-        
-        .product-img {
-            width: 100%;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-        }
-        
-        .product-info {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .product-title {
-            font-size: 2rem;
-            margin-bottom: 15px;
-        }
-        
-        .product-price {
-            font-size: 1.5rem;
-            color: var(--secondary-color);
-            margin-bottom: 20px;
-        }
-        
-        .product-description {
-            margin-bottom: 20px;
-            line-height: 1.8;
-        }
-        
-        .cart-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .cart-table th,
-        .cart-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid var(--gray);
-        }
-        
-        .cart-total {
-            margin-top: 20px;
-            text-align: right;
-            font-size: 1.2rem;
-        }
-        
         @media (max-width: 768px) {
-            .grid {
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            }
-            
-            .product-detail {
-                grid-template-columns: 1fr;
-            }
-            
             .header-content {
                 flex-direction: column;
                 align-items: flex-start;
@@ -238,6 +141,9 @@
             }
         }
     </style>
+    
+    <!-- Additional CSS files -->
+    <link rel="stylesheet" href="/public/css/styles.css">
 </head>
 <body>
     <header>
@@ -254,7 +160,7 @@
     </header>
     
     <main class="container">
-        <?php if (isset($pageTitle)): ?>
+        <?php if (isset($pageTitle) && strpos($_SERVER['REQUEST_URI'], '/products') !== 0): ?>
             <h1><?= $pageTitle ?></h1>
         <?php endif; ?>
         
