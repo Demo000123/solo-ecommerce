@@ -1,0 +1,46 @@
+# Composer dependencies
+/vendor/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# PHPUnit
+/phpunit.xml
+.phpunit.result.cache
+
+# Symfony PHPUnit Bridge
+.phpunit.result.cache
+
+# IDE files
+/.idea/
+/.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+/logs/
+*.log
+
+# Temporary files
+/tmp/
+/temp/
+
+# Cached files
+/cache/
+
+# User-specific files
+/.php_cs.cache
+/.php_cs
+/.php-cs-fixer.cache
+/.php-cs-fixer.php 
