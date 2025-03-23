@@ -33,10 +33,10 @@ class CartController extends Controller
                 $cartItems[] = [
                     'product' => $product,
                     'quantity' => $quantity,
-                    'subtotal' => $product->getPrice() * $quantity
+                    'subtotal' => $product['price'] * $quantity
                 ];
                 
-                $totalPrice += $product->getPrice() * $quantity;
+                $totalPrice += $product['price'] * $quantity;
             }
         }
         
@@ -59,7 +59,7 @@ class CartController extends Controller
         
         $product = $this->productService->getProductById($productId);
         
-        if (!$product || !$product->isInStock()) {
+        if (!$product || $product['stock'] <= 0) {
             $this->redirect('/cart');
             return;
         }

@@ -19,7 +19,7 @@ class ProductController extends Controller
     public function index(): void
     {
         // Get filter parameters
-        $category = $this->getParam('category');
+        $category = (int) $this->getParam('category', 0);
         $search = $this->getParam('search');
         $page = max(1, (int) $this->getParam('page', 1));
         $sortBy = $this->getParam('sort', 'name');
@@ -38,10 +38,18 @@ class ProductController extends Controller
             $products = $this->productService->searchProducts($search, $sortBy, $sortDirection, $page, $this->perPage);
             $totalProducts = $this->productService->getSearchCount($search);
             $pageTitle = "Search Results for '{$search}'";
-        } elseif ($category) {
+        } elseif ($category > 0) {
             $products = $this->productService->getProductsByCategory($category, $sortBy, $sortDirection, $page, $this->perPage);
-            $totalProducts = $this->productService->getCategoryCount($category);
-            $pageTitle = ucfirst($category) . " Products";
+            $totalProducts = $this->productService->countProducts($category);
+            // Find category name
+            $categoryName = "Products";
+            foreach ($categories as $cat) {
+                if ($cat['id'] == $category) {
+                    $categoryName = $cat['name'];
+                    break;
+                }
+            }
+            $pageTitle = $categoryName . " Products";
         } else {
             $products = $this->productService->getAllProducts($sortBy, $sortDirection, $page, $this->perPage);
             $totalProducts = $this->productService->getProductCount();
@@ -53,7 +61,7 @@ class ProductController extends Controller
         
         // Build the base URL for pagination links (preserving filters)
         $baseUrl = '/products?';
-        if ($category) {
+        if ($category > 0) {
             $baseUrl .= "category={$category}&";
         }
         if ($search) {
@@ -97,18 +105,13 @@ class ProductController extends Controller
             return;
         }
         
-        // Get products from the same category for "Related Products" section
-        $relatedProducts = $this->productService->getProductsByCategory($product->getCategory(), 'name', 'asc', 1, 4);
-        
-        // Filter out the current product from related products
-        $relatedProducts = array_filter($relatedProducts, function ($item) use ($id) {
-            return $item->getId() !== $id;
-        });
+        // Get related products using our enhanced algorithm
+        $relatedProducts = $this->productService->getRelatedProducts($id, 4);
         
         $this->render('products/show', [
             'product' => $product,
-            'relatedProducts' => array_slice($relatedProducts, 0, 3), // Show max 3 related products
-            'pageTitle' => $product->getName()
+            'relatedProducts' => $relatedProducts,
+            'pageTitle' => $product['name']
         ]);
     }
 } 

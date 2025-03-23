@@ -1,0 +1,478 @@
+/* Account pages shared styles */
+:root {
+    --white: #ffffff;
+    --body-color: #333333;
+    --heading-color: #111827;
+    --light-text: #6b7280;
+    --primary-color: #a3a874;
+    --primary-hover: #8a8f5e;
+    --border-color: #e5e7eb;
+    --border-radius: 8px;
+    --box-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --transition-normal: all 0.3s ease;
+}
+
+.account-container {
+    margin: 2.5rem auto 4rem;
+}
+
+.not-authenticated {
+    text-align: center;
+    padding: 3rem;
+    background-color: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow-sm);
+}
+
+.not-authenticated a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.not-authenticated a:hover {
+    text-decoration: underline;
+}
+
+.account-content {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 2rem;
+}
+
+.account-sidebar {
+    position: sticky;
+    top: 2rem;
+    height: fit-content;
+}
+
+.user-info {
+    background-color: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow-sm);
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.user-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background-color: var(--primary-color);
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-name {
+    font-size: 1.1rem;
+    margin: 0 0 0.25rem 0;
+    color: var(--heading-color);
+}
+
+.user-email {
+    font-size: 0.9rem;
+    margin: 0;
+    color: var(--light-text);
+}
+
+.account-menu {
+    background-color: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow-sm);
+    overflow: hidden;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.account-menu li {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.account-menu li:last-child {
+    border-bottom: none;
+}
+
+.account-menu a {
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--body-color);
+    text-decoration: none;
+    transition: var(--transition-normal);
+}
+
+.account-menu a i {
+    width: 20px;
+    text-align: center;
+    color: var(--light-text);
+}
+
+.account-menu a:hover {
+    background-color: #f8fafc;
+    color: var(--primary-color);
+}
+
+.account-menu a:hover i {
+    color: var(--primary-color);
+}
+
+.account-menu li.active a {
+    background-color: rgba(163, 168, 116, 0.1);
+    color: var(--primary-color);
+    font-weight: 500;
+    border-left: 3px solid var(--primary-color);
+}
+
+.account-menu li.active a i {
+    color: var(--primary-color);
+}
+
+.account-main {
+    background-color: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow-sm);
+    padding: 2rem;
+}
+
+.account-section {
+    margin-bottom: 2.5rem;
+}
+
+.account-section:last-child {
+    margin-bottom: 0;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.section-title {
+    font-size: 1.35rem;
+    margin: 0;
+    color: var(--heading-color);
+}
+
+.section-subtitle {
+    font-size: 1.1rem;
+    margin: 0 0 1rem 0;
+    color: var(--heading-color);
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.8rem 1.5rem;
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    border: none;
+    font-size: 0.95rem;
+    font-family: inherit;
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn-outline {
+    background-color: transparent;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+}
+
+.btn-outline:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-text {
+    background-color: transparent;
+    color: var(--primary-color);
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.btn-text:hover {
+    text-decoration: underline;
+}
+
+.btn-danger {
+    color: #ef4444;
+}
+
+.btn-danger:hover {
+    color: #dc2626;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 0.95rem;
+    font-family: inherit;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.form-control.error {
+    border-color: #ef4444;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--body-color);
+    font-weight: 500;
+}
+
+.required {
+    color: #ef4444;
+}
+
+.help-text {
+    font-size: 0.85rem;
+    color: var(--light-text);
+    margin-top: 0.5rem;
+}
+
+.error-message {
+    color: #ef4444;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1.5rem;
+}
+
+.alert-success {
+    background-color: #dcfce7;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+.alert-error {
+    background-color: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.alert-info {
+    background-color: #dbeafe;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.checkbox-container input[type="checkbox"] {
+    display: none;
+}
+
+.checkbox-custom {
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    margin-right: 0.5rem;
+    position: relative;
+}
+
+.checkbox-container input[type="checkbox"]:checked + .checkbox-custom::after {
+    content: '\f00c';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--primary-color);
+    font-size: 12px;
+}
+
+.status-badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.status-pending {
+    background-color: #fef3c7;
+    color: #d97706;
+}
+
+.status-processing {
+    background-color: #dbeafe;
+    color: #2563eb;
+}
+
+.status-shipping {
+    background-color: #e0e7ff;
+    color: #4f46e5;
+}
+
+.status-completed {
+    background-color: #dcfce7;
+    color: #16a34a;
+}
+
+.status-cancelled {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+/* Media Queries */
+@media (max-width: 992px) {
+    .account-content {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .account-sidebar {
+        position: static;
+    }
+}
+
+@media (max-width: 768px) {
+    .account-main {
+        padding: 1.5rem;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .form-actions .btn {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+}
+
+/* Dark mode adjustments */
+body.dark-mode {
+    --white: #1e293b;
+    --body-color: #e2e8f0;
+    --heading-color: #f8fafc;
+    --light-text: #94a3b8;
+    --border-color: #334155;
+    --box-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .account-menu a:hover {
+    background-color: #0f172a;
+}
+
+body.dark-mode .account-menu li.active a {
+    background-color: rgba(163, 168, 116, 0.2);
+}
+
+body.dark-mode .form-control {
+    background-color: #1e293b;
+    color: #e2e8f0;
+}
+
+body.dark-mode .form-control:focus {
+    border-color: var(--primary-color);
+}
+
+body.dark-mode .checkbox-custom {
+    background-color: #1e293b;
+}
+
+body.dark-mode .status-pending {
+    background-color: rgba(217, 119, 6, 0.2);
+}
+
+body.dark-mode .status-processing {
+    background-color: rgba(37, 99, 235, 0.2);
+}
+
+body.dark-mode .status-shipping {
+    background-color: rgba(79, 70, 229, 0.2);
+}
+
+body.dark-mode .status-completed {
+    background-color: rgba(22, 163, 74, 0.2);
+}
+
+body.dark-mode .status-cancelled {
+    background-color: rgba(220, 38, 38, 0.2);
+} 

@@ -10,7 +10,7 @@ return [
     ],
     'database' => [
         'host' => 'localhost',
-        'dbname' => 'ecommerce',
+        'dbname' => 'solo_ecommerce',
         'username' => 'root',
         'password' => '',
         'charset' => 'utf8mb4',
