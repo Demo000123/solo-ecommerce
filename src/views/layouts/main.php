@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $pageTitle ?? 'Solo E-commerce' ?></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
     <!-- Base styles -->
     <style>
         :root {
@@ -141,38 +144,23 @@
             }
         }
     </style>
-    
-    <!-- Additional CSS files -->
-    <link rel="stylesheet" href="/public/css/styles.css">
 </head>
 <body>
-    <header>
-        <div class="container header-content">
-            <a href="/" class="logo">Solo E-commerce</a>
-            <nav>
-                <ul>
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/products">Products</a></li>
-                    <li><a href="/cart">Cart</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
+    <!-- Header -->
+    <?php include __DIR__ . '/../partials/header.php'; ?>
     
-    <main class="container">
-        <?php if (isset($pageTitle) && strpos($_SERVER['REQUEST_URI'], '/products') !== 0): ?>
-            <h1><?= $pageTitle ?></h1>
-        <?php endif; ?>
-        
-        <?= $content ?>
+    <!-- Main Content -->
+    <main class="container my-4">
+        <?php include __DIR__ . '/../partials/messages.php'; ?>
+        <?= $content ?? '' ?>
     </main>
     
-    <footer>
-        <div class="container">
-            <p>&copy; <?= date('Y') ?> Solo E-commerce. All rights reserved.</p>
-        </div>
-    </footer>
+    <!-- Footer -->
+    <?php include __DIR__ . '/../partials/footer.php'; ?>
     
-    <script src="/public/js/main.js"></script>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/assets/js/main.js"></script>
 </body>
 </html> 

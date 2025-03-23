@@ -73,6 +73,32 @@ function getOrderStatusClass($status) {
             return '';
     }
 }
+
+// Get data from the controller
+$pagination = $pagination ?? null;
+$successMessage = $_SESSION['success_message'] ?? null;
+$errorMessage = $_SESSION['error_message'] ?? null;
+
+// Clear session messages
+unset($_SESSION['success_message'], $_SESSION['error_message']);
+
+// Order status colors
+$statusColors = [
+    'pending' => 'bg-warning',
+    'processing' => 'bg-info',
+    'shipped' => 'bg-primary',
+    'delivered' => 'bg-success',
+    'cancelled' => 'bg-danger',
+    'refunded' => 'bg-secondary'
+];
+
+// Payment status colors
+$paymentStatusColors = [
+    'pending' => 'bg-warning',
+    'paid' => 'bg-success',
+    'failed' => 'bg-danger',
+    'refunded' => 'bg-info'
+];
 ?>
 
 <link rel="stylesheet" href="/public/css/account.css">
@@ -159,6 +185,20 @@ function getOrderStatusClass($status) {
                     <div class="section-header">
                         <h2 class="section-title">Đơn hàng của tôi</h2>
                     </div>
+                    
+                    <?php if ($successMessage): ?>
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <?= htmlspecialchars($successMessage) ?>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <?php if ($errorMessage): ?>
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <?= htmlspecialchars($errorMessage) ?>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    <?php endif; ?>
                     
                     <?php if (empty($orders)): ?>
                         <div class="empty-orders">
@@ -520,5 +560,82 @@ function getOrderStatusClass($status) {
         }
     }
 </style>
+
+<!-- Cancel Order Confirmation Modal -->
+<div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-labelledby="cancelOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cancelOrderModalLabel">Confirm Cancellation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to cancel this order? This action cannot be undone.</p>
+                <div class="mb-3">
+                    <label for="cancellation_reason" class="form-label">Reason for Cancellation (Optional)</label>
+                    <select class="form-select" id="cancellation_reason" name="cancellation_reason">
+                        <option value="Changed my mind">Changed my mind</option>
+                        <option value="Found a better price">Found a better price</option>
+                        <option value="Ordered by mistake">Ordered by mistake</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="mb-3" id="other_reason_container" style="display: none;">
+                    <label for="other_reason" class="form-label">Please specify</label>
+                    <textarea class="form-control" id="other_reason" name="other_reason" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, Keep Order</button>
+                <button type="button" class="btn btn-danger" id="confirmCancelBtn">Yes, Cancel Order</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Cancel order confirmation
+    const cancelButtons = document.querySelectorAll('.cancel-order-btn');
+    const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+    let activeForm = null;
+    
+    cancelButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            activeForm = this.closest('form');
+            const cancelModal = new bootstrap.Modal(document.getElementById('cancelOrderModal'));
+            cancelModal.show();
+        });
+    });
+    
+    if (confirmCancelBtn) {
+        confirmCancelBtn.addEventListener('click', function() {
+            if (activeForm) {
+                // Add reason to the form
+                const reason = document.getElementById('cancellation_reason').value;
+                const otherReason = document.getElementById('other_reason').value;
+                
+                let reasonInput = document.createElement('input');
+                reasonInput.type = 'hidden';
+                reasonInput.name = 'reason';
+                reasonInput.value = reason === 'Other' && otherReason ? otherReason : reason;
+                
+                activeForm.appendChild(reasonInput);
+                activeForm.submit();
+            }
+        });
+    }
+    
+    // Show/hide other reason field
+    const reasonSelect = document.getElementById('cancellation_reason');
+    const otherReasonContainer = document.getElementById('other_reason_container');
+    
+    if (reasonSelect && otherReasonContainer) {
+        reasonSelect.addEventListener('change', function() {
+            otherReasonContainer.style.display = this.value === 'Other' ? 'block' : 'none';
+        });
+    }
+});
+</script>
 
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?> 

@@ -7,27 +7,275 @@
 <!-- VanillaTilt.js for 3D card effects -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
 
-<!-- Hero Section with 3D Animation -->
-<section class="hero-container">
-    <div class="hero-content">
-        <h1 class="hero-title">Discover <span class="gradient-text">Next-Gen</span> Shopping Experience</h1>
-        <p class="hero-subtitle">Shop the latest trends in fashion, electronics, home decor and more with immersive 3D experiences and personalized recommendations.</p>
-        <div class="hero-cta">
-            <a href="/products" class="btn btn-primary btn-large">Shop Now</a>
-            <a href="/categories" class="btn btn-outline btn-large">Browse Categories</a>
+<?php
+/**
+ * Home page template
+ * 
+ * Variables available:
+ * $featuredProducts - Array of featured products
+ * $newProducts - Array of recently added products
+ * $popularProducts - Array of most popular products
+ * $featuredCategories - Array of featured categories
+ */
+?>
+
+<!-- Hero Carousel -->
+<div id="heroCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
+    <div class="carousel-indicators">
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+    </div>
+    <div class="carousel-inner rounded shadow">
+        <div class="carousel-item active">
+            <img src="/assets/images/hero-banner-1.jpg" class="d-block w-100" alt="Summer Sale" onerror="this.src='/assets/images/placeholder-banner.jpg'">
+            <div class="carousel-caption d-none d-md-block">
+                <h2>Summer Sale</h2>
+                <p>Up to 50% off on selected items</p>
+                <a href="/products?sale=1" class="btn btn-primary">Shop Now</a>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <img src="/assets/images/hero-banner-2.jpg" class="d-block w-100" alt="New Arrivals" onerror="this.src='/assets/images/placeholder-banner.jpg'">
+            <div class="carousel-caption d-none d-md-block">
+                <h2>New Arrivals</h2>
+                <p>Check out our latest products</p>
+                <a href="/products?sort=newest" class="btn btn-primary">Explore</a>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <img src="/assets/images/hero-banner-3.jpg" class="d-block w-100" alt="Free Shipping" onerror="this.src='/assets/images/placeholder-banner.jpg'">
+            <div class="carousel-caption d-none d-md-block">
+                <h2>Free Shipping</h2>
+                <p>On orders over $50</p>
+                <a href="/shipping" class="btn btn-primary">Learn More</a>
+            </div>
         </div>
     </div>
-    <div class="hero-image-container">
-        <div class="blob-shape"></div>
-        <div class="floating-products">
-            <?php
-            // Display 3 random featured products as floating images
-            $featuredProducts = array_slice($featuredProducts ?? [], 0, 3);
-            foreach ($featuredProducts as $index => $product): ?>
-                <div class="floating-product">
-                    <img src="/public/images/<?= htmlspecialchars($product['image'] ?? 'placeholder.jpg') ?>" alt="<?= htmlspecialchars($product['name'] ?? 'Product') ?>">
+    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
+</div>
+
+<!-- Featured Categories -->
+<section class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Shop by Category</h2>
+        <a href="/categories" class="btn btn-outline-primary btn-sm">View All</a>
+    </div>
+    
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        <?php foreach ($featuredCategories as $category): ?>
+        <div class="col">
+            <div class="card category-card h-100">
+                <img src="<?= htmlspecialchars($category['image_url']) ?>" class="card-img-top" alt="<?= htmlspecialchars($category['name']) ?>" onerror="this.src='/assets/images/placeholder-category.jpg'">
+                <div class="card-body text-center">
+                    <h5 class="card-title"><?= htmlspecialchars($category['name']) ?></h5>
+                    <p class="card-text"><?= htmlspecialchars($category['description']) ?></p>
+                    <a href="/category/<?= htmlspecialchars($category['slug']) ?>" class="btn btn-primary">Browse Products</a>
                 </div>
-            <?php endforeach; ?>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+</section>
+
+<!-- Featured Products -->
+<section class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Featured Products</h2>
+        <a href="/products?featured=1" class="btn btn-outline-primary btn-sm">View All</a>
+    </div>
+    
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        <?php foreach ($featuredProducts as $product): ?>
+        <div class="col">
+            <div class="card product-card h-100">
+                <div class="position-relative">
+                    <img src="<?= htmlspecialchars($product['image_url']) ?>" class="card-img-top" alt="<?= htmlspecialchars($product['name']) ?>" onerror="this.src='/assets/images/placeholder-product.jpg'">
+                    <?php if ($product['is_sale']): ?>
+                    <span class="badge bg-danger position-absolute top-0 start-0 m-2">Sale</span>
+                    <?php endif; ?>
+                    <?php if ($product['is_new']): ?>
+                    <span class="badge bg-success position-absolute top-0 end-0 m-2">New</span>
+                    <?php endif; ?>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title"><?= htmlspecialchars($product['name']) ?></h5>
+                    <p class="card-text text-muted small"><?= htmlspecialchars($product['category_name']) ?></p>
+                    <div class="mt-auto">
+                        <?php if ($product['discount_price']): ?>
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="text-danger fw-bold me-2">$<?= number_format($product['discount_price'], 2) ?></span>
+                            <s class="text-muted small">$<?= number_format($product['price'], 2) ?></s>
+                        </div>
+                        <?php else: ?>
+                        <p class="fw-bold mb-2">$<?= number_format($product['price'], 2) ?></p>
+                        <?php endif; ?>
+                        
+                        <div class="d-grid gap-2">
+                            <a href="/product/<?= htmlspecialchars($product['slug']) ?>" class="btn btn-outline-primary btn-sm">View Details</a>
+                            <button class="btn btn-primary btn-sm add-to-cart-btn" data-product-id="<?= $product['id'] ?>">
+                                <i class="fas fa-shopping-cart"></i> Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+</section>
+
+<!-- New Arrivals -->
+<section class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">New Arrivals</h2>
+        <a href="/products?sort=newest" class="btn btn-outline-primary btn-sm">View All</a>
+    </div>
+    
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        <?php foreach ($newProducts as $product): ?>
+        <div class="col">
+            <div class="card product-card h-100">
+                <div class="position-relative">
+                    <img src="<?= htmlspecialchars($product['image_url']) ?>" class="card-img-top" alt="<?= htmlspecialchars($product['name']) ?>" onerror="this.src='/assets/images/placeholder-product.jpg'">
+                    <?php if ($product['is_sale']): ?>
+                    <span class="badge bg-danger position-absolute top-0 start-0 m-2">Sale</span>
+                    <?php endif; ?>
+                    <span class="badge bg-success position-absolute top-0 end-0 m-2">New</span>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title"><?= htmlspecialchars($product['name']) ?></h5>
+                    <p class="card-text text-muted small"><?= htmlspecialchars($product['category_name']) ?></p>
+                    <div class="mt-auto">
+                        <?php if ($product['discount_price']): ?>
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="text-danger fw-bold me-2">$<?= number_format($product['discount_price'], 2) ?></span>
+                            <s class="text-muted small">$<?= number_format($product['price'], 2) ?></s>
+                        </div>
+                        <?php else: ?>
+                        <p class="fw-bold mb-2">$<?= number_format($product['price'], 2) ?></p>
+                        <?php endif; ?>
+                        
+                        <div class="d-grid gap-2">
+                            <a href="/product/<?= htmlspecialchars($product['slug']) ?>" class="btn btn-outline-primary btn-sm">View Details</a>
+                            <button class="btn btn-primary btn-sm add-to-cart-btn" data-product-id="<?= $product['id'] ?>">
+                                <i class="fas fa-shopping-cart"></i> Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+</section>
+
+<!-- Popular Products -->
+<section class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Most Popular</h2>
+        <a href="/products?sort=popular" class="btn btn-outline-primary btn-sm">View All</a>
+    </div>
+    
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        <?php foreach ($popularProducts as $product): ?>
+        <div class="col">
+            <div class="card product-card h-100">
+                <div class="position-relative">
+                    <img src="<?= htmlspecialchars($product['image_url']) ?>" class="card-img-top" alt="<?= htmlspecialchars($product['name']) ?>" onerror="this.src='/assets/images/placeholder-product.jpg'">
+                    <?php if ($product['is_sale']): ?>
+                    <span class="badge bg-danger position-absolute top-0 start-0 m-2">Sale</span>
+                    <?php endif; ?>
+                    <?php if ($product['is_new']): ?>
+                    <span class="badge bg-success position-absolute top-0 end-0 m-2">New</span>
+                    <?php endif; ?>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title"><?= htmlspecialchars($product['name']) ?></h5>
+                    <p class="card-text text-muted small"><?= htmlspecialchars($product['category_name']) ?></p>
+                    <div class="mt-auto">
+                        <?php if ($product['discount_price']): ?>
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="text-danger fw-bold me-2">$<?= number_format($product['discount_price'], 2) ?></span>
+                            <s class="text-muted small">$<?= number_format($product['price'], 2) ?></s>
+                        </div>
+                        <?php else: ?>
+                        <p class="fw-bold mb-2">$<?= number_format($product['price'], 2) ?></p>
+                        <?php endif; ?>
+                        
+                        <div class="d-grid gap-2">
+                            <a href="/product/<?= htmlspecialchars($product['slug']) ?>" class="btn btn-outline-primary btn-sm">View Details</a>
+                            <button class="btn btn-primary btn-sm add-to-cart-btn" data-product-id="<?= $product['id'] ?>">
+                                <i class="fas fa-shopping-cart"></i> Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+</section>
+
+<!-- Promotion Banners -->
+<section class="mb-5">
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="row g-0">
+                    <div class="col-md-6">
+                        <img src="/assets/images/promo-banner-1.jpg" class="img-fluid rounded-start h-100" alt="Free Shipping" onerror="this.src='/assets/images/placeholder-banner.jpg'">
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card-body">
+                            <h3 class="card-title">Free Shipping</h3>
+                            <p class="card-text">On all orders over $50. Limited time offer.</p>
+                            <a href="/shipping" class="btn btn-outline-primary">Learn More</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="row g-0">
+                    <div class="col-md-6">
+                        <img src="/assets/images/promo-banner-2.jpg" class="img-fluid rounded-start h-100" alt="Reward Points" onerror="this.src='/assets/images/placeholder-banner.jpg'">
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card-body">
+                            <h3 class="card-title">Reward Points</h3>
+                            <p class="card-text">Earn points with every purchase. Redeem for discounts.</p>
+                            <a href="/rewards" class="btn btn-outline-primary">Join Now</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter -->
+<section class="mb-5">
+    <div class="card bg-light">
+        <div class="card-body text-center py-5">
+            <h3 class="card-title">Subscribe to Our Newsletter</h3>
+            <p class="card-text">Stay updated with our latest products and offers</p>
+            <form action="/newsletter/subscribe" method="post" class="row g-3 justify-content-center">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="email" class="form-control" name="email" placeholder="Your email address" required>
+                        <button type="submit" class="btn btn-primary">Subscribe</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 </section>
@@ -178,18 +426,6 @@
         </div>
         <h3>24/7 Support</h3>
         <p>We're here to help</p>
-    </div>
-</section>
-
-<!-- Newsletter Section with Glassmorphism -->
-<section class="newsletter-section">
-    <div class="glassmorphism-card">
-        <h2>Join Our Newsletter</h2>
-        <p>Subscribe to get special offers, free giveaways, and product launches info.</p>
-        <form class="newsletter-form" onsubmit="subscribeNewsletter(event)">
-            <input type="email" placeholder="Your email address" required>
-            <button type="submit" class="btn">Subscribe</button>
-        </form>
     </div>
 </section>
 

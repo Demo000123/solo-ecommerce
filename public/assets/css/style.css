@@ -1,0 +1,207 @@
+/* 
+ * Solo E-commerce - Main CSS File 
+ */
+
+:root {
+    --primary: #3a86ff;
+    --secondary: #ff006e;
+    --success: #4caf50;
+    --info: #5bc0de;
+    --warning: #f0ad4e;
+    --danger: #d9534f;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --grey: #6c757d;
+    --border-radius: 0.25rem;
+    --box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    --transition: all 0.3s ease-in-out;
+}
+
+/* Product cards */
+.product-card {
+    transition: var(--transition);
+    overflow: hidden;
+    height: 100%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.product-card .card-img-top {
+    height: 200px;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.product-card:hover .card-img-top {
+    transform: scale(1.05);
+}
+
+/* Custom badges */
+.badge {
+    padding: 0.5em 0.75em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Category cards */
+.category-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--border-radius);
+    margin-bottom: 1.5rem;
+}
+
+.category-card img {
+    transition: transform 0.5s ease;
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.category-card:hover img {
+    transform: scale(1.1);
+}
+
+.category-card .category-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 1rem;
+    color: white;
+}
+
+/* Hero banner */
+.hero-banner {
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+.hero-banner .carousel-item {
+    height: 400px;
+}
+
+.hero-banner img {
+    object-fit: cover;
+    height: 100%;
+    width: 100%;
+}
+
+.hero-banner .carousel-caption {
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+}
+
+/* Product Filters */
+.filter-card {
+    margin-bottom: 1.5rem;
+}
+
+.filter-header {
+    cursor: pointer;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+}
+
+/* Checkout form */
+.checkout-steps {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+}
+
+.checkout-step {
+    flex: 1;
+    text-align: center;
+    padding: 1rem 0;
+    position: relative;
+}
+
+.checkout-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #e0e0e0;
+    transform: translateY(-50%);
+    z-index: -1;
+}
+
+.checkout-step.active {
+    font-weight: bold;
+    color: var(--primary);
+}
+
+.checkout-step.active .step-number {
+    background-color: var(--primary);
+}
+
+.step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    color: white;
+    margin-bottom: 0.5rem;
+}
+
+/* Account Dashboard */
+.account-sidebar {
+    margin-bottom: 1.5rem;
+}
+
+/* Admin styles */
+.admin-sidebar {
+    min-height: 100vh;
+    background-color: var(--dark);
+    color: white;
+}
+
+.admin-sidebar .nav-link {
+    color: #adb5bd;
+    padding: 0.5rem 1rem;
+    margin-bottom: 0.2rem;
+}
+
+.admin-sidebar .nav-link:hover,
+.admin-sidebar .nav-link.active {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.admin-sidebar .nav-link i {
+    width: 20px;
+    text-align: center;
+    margin-right: 0.5rem;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .hero-banner .carousel-item {
+        height: 300px;
+    }
+    
+    .checkout-steps {
+        flex-direction: column;
+    }
+    
+    .checkout-step {
+        margin-bottom: 1rem;
+    }
+    
+    .checkout-step:not(:last-child)::after {
+        display: none;
+    }
+} 

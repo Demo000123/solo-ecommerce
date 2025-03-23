@@ -1,6 +1,21 @@
 <?php
 // Address management page
 require_once __DIR__ . '/../layouts/header.php';
+
+// Get any error messages or success messages
+$errors = $_SESSION['validation_errors'] ?? [];
+$oldInput = $_SESSION['old_input'] ?? [];
+$successMessage = $_SESSION['success_message'] ?? null;
+$errorMessage = $_SESSION['error_message'] ?? null;
+
+// Clear session data
+unset($_SESSION['validation_errors'], $_SESSION['old_input'], $_SESSION['success_message'], $_SESSION['error_message']);
+
+// Get addresses and countries data
+$addresses = $addresses ?? [];
+$countries = $countries ?? [];
+$states = $states ?? [];
+$editAddress = $editAddress ?? null;
 ?>
 
 <link rel="stylesheet" href="/public/css/account.css">
@@ -91,14 +106,15 @@ require_once __DIR__ . '/../layouts/header.php';
                         </button>
                     </div>
                     
-                    <?php if (isset($updateSuccess)): ?>
+                    <?php if ($successMessage): ?>
                         <div class="alert alert-success">
-                            <?= $updateSuccess ?>
+                            <?= htmlspecialchars($successMessage) ?>
                         </div>
                     <?php endif; ?>
                     
-                    <?php if (isset($updateError)): ?>
+                    <?php if ($errorMessage): ?>
                         <div class="alert alert-error">
+                            <?= htmlspecialchars($errorMessage) ?>
                             <?= $updateError ?>
                         </div>
                     <?php endif; ?>

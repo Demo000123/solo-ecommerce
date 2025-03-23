@@ -14,277 +14,442 @@
     </div>
 </div>
 
-<div class="cart-container container">
+<div class="container py-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Shopping Cart</li>
+        </ol>
+    </nav>
+    
+    <h1 class="h2 mb-4">Shopping Cart</h1>
+    
     <?php if (empty($cartItems)): ?>
-        <div class="empty-cart">
-            <div class="empty-cart-icon">
-                <i class="fas fa-shopping-cart"></i>
-            </div>
-            <h2>Giỏ hàng của bạn đang trống</h2>
-            <p>Hãy thêm sản phẩm vào giỏ hàng để tiếp tục mua sắm</p>
-            <a href="/solo-ecommerce/src/views/products/index.php" class="btn btn-primary">Tiếp tục mua sắm</a>
+    <!-- Empty Cart -->
+    <div class="card border-0 shadow-sm p-4 text-center">
+        <div class="empty-cart-container py-5">
+            <i class="fas fa-shopping-cart fa-4x text-muted mb-4"></i>
+            <h2 class="h4">Your cart is empty</h2>
+            <p class="text-muted mb-4">Looks like you haven't added any products to your cart yet.</p>
+            <a href="/products" class="btn btn-primary">Continue Shopping</a>
         </div>
+    </div>
     <?php else: ?>
-        <div class="cart-content">
-            <div class="cart-items">
-                <div class="cart-header">
-                    <div class="cart-header-item product-info">Sản phẩm</div>
-                    <div class="cart-header-item product-price">Đơn giá</div>
-                    <div class="cart-header-item product-quantity">Số lượng</div>
-                    <div class="cart-header-item product-subtotal">Thành tiền</div>
-                    <div class="cart-header-item product-remove"></div>
+    <div class="row">
+        <!-- Cart Items -->
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">Cart Items (<?= $totalItems ?>)</h5>
                 </div>
-                
-                <?php foreach ($cartItems as $item): ?>
-                    <div class="cart-item">
-                        <div class="product-info">
-                            <div class="product-image">
-                                <a href="/products/<?= $item['product_id'] ?>">
-                                    <img src="<?= htmlspecialchars($item['image'] ?? '/public/images/placeholder.jpg') ?>" alt="<?= htmlspecialchars($item['name']) ?>">
+                <div class="card-body">
+                    <?php foreach ($cartItems as $item): ?>
+                    <div class="cart-item mb-4 pb-4 border-bottom">
+                        <div class="row">
+                            <!-- Product Image -->
+                            <div class="col-md-2 col-4 mb-3 mb-md-0">
+                                <a href="/product/<?= htmlspecialchars($item['product_slug']) ?>">
+                                    <img src="<?= htmlspecialchars($item['image_url']) ?>" class="img-fluid rounded" alt="<?= htmlspecialchars($item['name']) ?>" onerror="this.src='/assets/images/placeholders/product.jpg'">
                                 </a>
                             </div>
-                            <div class="product-details">
-                                <h3 class="product-name">
-                                    <a href="/products/<?= $item['product_id'] ?>"><?= htmlspecialchars($item['name']) ?></a>
-                                </h3>
-                                <div class="product-meta">
-                                    <?php if (!empty($item['category_name'])): ?>
-                                        <span class="product-category"><?= htmlspecialchars($item['category_name']) ?></span>
-                                    <?php endif; ?>
-                                    
-                                    <?php if ($item['stock'] <= 5 && $item['stock'] > 0): ?>
-                                        <span class="stock-warning">Chỉ còn <?= $item['stock'] ?> sản phẩm</span>
-                                    <?php elseif ($item['stock'] <= 0): ?>
-                                        <span class="out-of-stock">Hết hàng</span>
+                            
+                            <!-- Product Details -->
+                            <div class="col-md-5 col-8 mb-3 mb-md-0">
+                                <h5 class="mb-1">
+                                    <a href="/product/<?= htmlspecialchars($item['product_slug']) ?>" class="text-decoration-none text-dark"><?= htmlspecialchars($item['name']) ?></a>
+                                </h5>
+                                <p class="text-muted mb-1 small">SKU: <?= htmlspecialchars($item['sku']) ?></p>
+                                
+                                <?php if (!empty($item['options'])): ?>
+                                <div class="product-options small text-muted mb-2">
+                                    <?php foreach ($item['options'] as $optionName => $optionValue): ?>
+                                    <div><?= htmlspecialchars($optionName) ?>: <?= htmlspecialchars($optionValue) ?></div>
+                                    <?php endforeach; ?>
+                                </div>
+                                <?php endif; ?>
+                                
+                                <div class="d-md-none d-flex align-items-center mt-2">
+                                    <span class="me-2">Price:</span>
+                                    <?php if ($item['discount_price']): ?>
+                                    <span class="text-danger me-2">$<?= number_format($item['discount_price'], 2) ?></span>
+                                    <s class="text-muted small">$<?= number_format($item['price'], 2) ?></s>
+                                    <?php else: ?>
+                                    <span>$<?= number_format($item['price'], 2) ?></span>
                                     <?php endif; ?>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <div class="product-price">
-                            <span class="current-price"><?= number_format($item['price'], 0, ',', '.') ?> ₫</span>
-                            <?php if (isset($item['original_price']) && $item['original_price'] > $item['price']): ?>
-                                <span class="original-price"><?= number_format($item['original_price'], 0, ',', '.') ?> ₫</span>
-                            <?php endif; ?>
-                        </div>
-                        
-                        <div class="product-quantity">
-                            <form action="/cart/update" method="POST" class="quantity-form">
-                                <input type="hidden" name="product_id" value="<?= $item['product_id'] ?>">
-                                <div class="quantity-control">
-                                    <button type="button" class="quantity-btn decrease" <?= $item['quantity'] <= 1 ? 'disabled' : '' ?>>
-                                        <i class="fas fa-minus"></i>
-                                    </button>
-                                    <input type="number" name="quantity" value="<?= $item['quantity'] ?>" min="1" max="<?= $item['stock'] ?>" class="quantity-input" data-product-id="<?= $item['product_id'] ?>">
-                                    <button type="button" class="quantity-btn increase" <?= $item['quantity'] >= $item['stock'] ? 'disabled' : '' ?>>
-                                        <i class="fas fa-plus"></i>
+                            
+                            <!-- Quantity -->
+                            <div class="col-md-2 col-6 mb-3 mb-md-0">
+                                <div class="d-flex align-items-center">
+                                    <div class="input-group input-group-sm" style="width: 110px;">
+                                        <button type="button" class="btn btn-outline-secondary quantity-minus" data-item-id="<?= $item['id'] ?>"><i class="fas fa-minus"></i></button>
+                                        <input type="number" class="form-control text-center quantity-input" value="<?= $item['quantity'] ?>" min="1" max="<?= $item['stock_quantity'] ?>" data-cart-item="<?= $item['id'] ?>">
+                                        <button type="button" class="btn btn-outline-secondary quantity-plus" data-item-id="<?= $item['id'] ?>"><i class="fas fa-plus"></i></button>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-block mt-2">
+                                    <button type="button" class="btn btn-sm btn-link text-danger p-0 remove-item" data-item-id="<?= $item['id'] ?>">
+                                        <i class="fas fa-trash-alt me-1"></i> Remove
                                     </button>
                                 </div>
-                            </form>
-                        </div>
-                        
-                        <div class="product-subtotal">
-                            <?= number_format($item['price'] * $item['quantity'], 0, ',', '.') ?> ₫
-                        </div>
-                        
-                        <div class="product-remove">
-                            <form action="/cart/remove" method="POST">
-                                <input type="hidden" name="product_id" value="<?= $item['product_id'] ?>">
-                                <button type="submit" class="remove-btn" title="Xóa sản phẩm">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </form>
+                            </div>
+                            
+                            <!-- Price -->
+                            <div class="col-md-3 col-6 text-end">
+                                <div class="d-none d-md-block mb-2">
+                                    <?php if ($item['discount_price']): ?>
+                                    <div class="text-danger">$<?= number_format($item['discount_price'], 2) ?></div>
+                                    <s class="text-muted small">$<?= number_format($item['price'], 2) ?></s>
+                                    <?php else: ?>
+                                    <div>$<?= number_format($item['price'], 2) ?></div>
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <div class="fw-bold">
+                                    $<span id="item-total-<?= $item['id'] ?>"><?= number_format($item['total'], 2) ?></span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                <?php endforeach; ?>
-                
-                <div class="cart-actions">
-                    <div class="coupon-section">
-                        <form action="/cart/apply-coupon" method="POST" class="coupon-form">
-                            <input type="text" name="coupon_code" placeholder="Mã giảm giá" class="coupon-input">
-                            <button type="submit" class="btn btn-outline">Áp dụng</button>
-                        </form>
+                    <?php endforeach; ?>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="/products" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left me-2"></i>Continue Shopping
+                        </a>
+                        <button type="button" class="btn btn-outline-danger" onclick="clearCart()">
+                            <i class="fas fa-trash me-2"></i>Clear Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Order Summary -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">Order Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Subtotal (<?= $totalItems ?> items)</span>
+                        <span>$<span id="cart-subtotal"><?= number_format($subtotal, 2) ?></span></span>
                     </div>
                     
-                    <div class="cart-buttons">
-                        <a href="/products" class="btn btn-outline">Tiếp tục mua sắm</a>
-                        <form action="/cart/clear" method="POST">
-                            <button type="submit" class="btn btn-outline btn-danger">Xóa giỏ hàng</button>
-                        </form>
+                    <!-- Coupon Code Form -->
+                    <div class="mb-3">
+                        <div class="input-group mb-2">
+                            <input type="text" id="couponCode" class="form-control" placeholder="Coupon code" value="<?= htmlspecialchars($couponCode ?? '') ?>">
+                            <button class="btn btn-outline-secondary" type="button" id="applyCouponBtn" onclick="applyCoupon()">Apply</button>
+                        </div>
+                        <div id="couponMessage" class="form-text <?= isset($couponCode) ? 'text-success' : '' ?>">
+                            <?= isset($couponCode) ? 'Coupon applied successfully!' : 'Enter a valid coupon code if you have one' ?>
+                        </div>
+                    </div>
+                    
+                    <?php if (isset($couponDiscount) && $couponDiscount > 0): ?>
+                    <div class="d-flex justify-content-between mb-3 text-success">
+                        <span>Discount</span>
+                        <span>-$<?= number_format($couponDiscount, 2) ?></span>
+                    </div>
+                    <?php endif; ?>
+                    
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Shipping</span>
+                        <span id="shipping-fee">
+                            <?= $shippingFee > 0 ? '$' . number_format($shippingFee, 2) : 'Calculated at checkout' ?>
+                        </span>
+                    </div>
+                    
+                    <hr class="my-3">
+                    
+                    <div class="d-flex justify-content-between mb-4">
+                        <strong>Total</strong>
+                        <strong class="text-primary">$<span id="cart-total"><?= number_format($total, 2) ?></span></strong>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="/checkout" class="btn btn-primary btn-lg">
+                            Proceed to Checkout
+                        </a>
                     </div>
                 </div>
             </div>
             
-            <div class="cart-summary">
-                <h3 class="summary-title">Tóm tắt đơn hàng</h3>
-                
-                <div class="summary-item">
-                    <span class="summary-label">Tạm tính</span>
-                    <span class="summary-value"><?= number_format($cartTotal, 0, ',', '.') ?> ₫</span>
-                </div>
-                
-                <?php if (!empty($discount)): ?>
-                    <div class="summary-item discount">
-                        <span class="summary-label">Giảm giá</span>
-                        <span class="summary-value">-<?= number_format($discount, 0, ',', '.') ?> ₫</span>
+            <!-- Payment Methods & Security -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h6 class="mb-3">We Accept</h6>
+                    <div class="payment-methods d-flex flex-wrap mb-3">
+                        <img src="/assets/images/payment/visa.png" alt="Visa" class="me-2 mb-2" onerror="this.src='/assets/images/placeholders/payment.jpg'" width="40">
+                        <img src="/assets/images/payment/mastercard.png" alt="Mastercard" class="me-2 mb-2" onerror="this.src='/assets/images/placeholders/payment.jpg'" width="40">
+                        <img src="/assets/images/payment/amex.png" alt="American Express" class="me-2 mb-2" onerror="this.src='/assets/images/placeholders/payment.jpg'" width="40">
+                        <img src="/assets/images/payment/paypal.png" alt="PayPal" class="me-2 mb-2" onerror="this.src='/assets/images/placeholders/payment.jpg'" width="40">
                     </div>
-                <?php endif; ?>
-                
-                <div class="summary-item shipping">
-                    <span class="summary-label">Phí vận chuyển</span>
-                    <span class="summary-value"><?= $shippingFee > 0 ? number_format($shippingFee, 0, ',', '.') . ' ₫' : 'Miễn phí' ?></span>
-                </div>
-                
-                <div class="summary-item total">
-                    <span class="summary-label">Tổng cộng</span>
-                    <span class="summary-value"><?= number_format($cartTotal - ($discount ?? 0) + $shippingFee, 0, ',', '.') ?> ₫</span>
-                </div>
-                
-                <div class="checkout-button">
-                    <a href="/checkout" class="btn btn-primary btn-block">Tiến hành thanh toán</a>
-                </div>
-                
-                <div class="secure-checkout">
-                    <div class="secure-icon">
-                        <i class="fas fa-lock"></i>
-                    </div>
-                    <p>Thanh toán an toàn và bảo mật</p>
-                </div>
-                
-                <div class="payment-methods">
-                    <p>Chấp nhận thanh toán qua:</p>
-                    <div class="payment-icons">
-                        <img src="/public/images/payment/visa.png" alt="Visa">
-                        <img src="/public/images/payment/mastercard.png" alt="MasterCard">
-                        <img src="/public/images/payment/paypal.png" alt="PayPal">
-                        <img src="/public/images/payment/momo.png" alt="MoMo">
+                    
+                    <div class="secure-checkout d-flex align-items-center">
+                        <i class="fas fa-lock text-success me-2"></i>
+                        <span class="small">Secure Checkout - 100% Protected</span>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
     <?php endif; ?>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteItemModal" tabindex="-1" aria-labelledby="deleteItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteItemModalLabel">Confirm Removal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to remove this item from your cart?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Remove Item</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Clear Cart Confirmation Modal -->
+<div class="modal fade" id="clearCartModal" tabindex="-1" aria-labelledby="clearCartModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="clearCartModalLabel">Confirm Clear Cart</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to remove all items from your cart?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmClearCart">Clear Cart</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Quantity control functionality
-        const decreaseButtons = document.querySelectorAll('.quantity-btn.decrease');
-        const increaseButtons = document.querySelectorAll('.quantity-btn.increase');
+        // Initialize Bootstrap modals
+        const deleteItemModal = new bootstrap.Modal(document.getElementById('deleteItemModal'));
+        const clearCartModal = new bootstrap.Modal(document.getElementById('clearCartModal'));
+        
+        // Quantity buttons
         const quantityInputs = document.querySelectorAll('.quantity-input');
         
-        // Handle decrease button clicks
-        decreaseButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const input = this.parentElement.querySelector('.quantity-input');
-                let value = parseInt(input.value);
-                
-                if (value > 1) {
-                    value--;
-                    input.value = value;
-                    updateCartItem(input);
-                    
-                    // Enable/disable buttons based on new value
-                    updateQuantityButtonStates(input);
-                }
-            });
-        });
-        
-        // Handle increase button clicks
-        increaseButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const input = this.parentElement.querySelector('.quantity-input');
-                let value = parseInt(input.value);
-                let max = parseInt(input.getAttribute('max'));
-                
-                if (value < max) {
-                    value++;
-                    input.value = value;
-                    updateCartItem(input);
-                    
-                    // Enable/disable buttons based on new value
-                    updateQuantityButtonStates(input);
-                }
-            });
-        });
-        
-        // Handle direct input changes
         quantityInputs.forEach(input => {
+            const minusBtn = input.parentElement.querySelector('.quantity-minus');
+            const plusBtn = input.parentElement.querySelector('.quantity-plus');
+            
+            if (minusBtn) {
+                minusBtn.addEventListener('click', function() {
+                    let value = parseInt(input.value);
+                    const itemId = this.getAttribute('data-item-id');
+                    
+                    if (value > 1) {
+                        input.value = value - 1;
+                        updateCartItem(itemId, input.value);
+                    }
+                });
+            }
+            
+            if (plusBtn) {
+                plusBtn.addEventListener('click', function() {
+                    let value = parseInt(input.value);
+                    const itemId = this.getAttribute('data-item-id');
+                    let max = parseInt(input.getAttribute('max') || 100);
+                    
+                    if (value < max) {
+                        input.value = value + 1;
+                        updateCartItem(itemId, input.value);
+                    }
+                });
+            }
+            
+            // Update when input changes (manual entry)
             input.addEventListener('change', function() {
-                let value = parseInt(this.value);
-                let min = parseInt(this.getAttribute('min'));
-                let max = parseInt(this.getAttribute('max'));
+                let value = parseInt(input.value);
+                const itemId = input.getAttribute('data-cart-item');
+                let max = parseInt(input.getAttribute('max') || 100);
                 
-                // Ensure value is within valid range
-                if (isNaN(value) || value < min) {
-                    this.value = min;
-                } else if (value > max) {
-                    this.value = max;
+                // Ensure value is at least 1
+                if (value < 1) {
+                    value = 1;
+                    input.value = 1;
                 }
                 
-                updateCartItem(this);
+                // Ensure value doesn't exceed max
+                if (value > max) {
+                    value = max;
+                    input.value = max;
+                }
                 
-                // Enable/disable buttons based on new value
-                updateQuantityButtonStates(this);
+                updateCartItem(itemId, value);
             });
         });
         
-        // Helper function to update quantity button states
-        function updateQuantityButtonStates(input) {
-            const decreaseBtn = input.parentElement.querySelector('.decrease');
-            const increaseBtn = input.parentElement.querySelector('.increase');
-            const value = parseInt(input.value);
-            const min = parseInt(input.getAttribute('min'));
-            const max = parseInt(input.getAttribute('max'));
-            
-            decreaseBtn.disabled = value <= min;
-            increaseBtn.disabled = value >= max;
-        }
+        // Remove item buttons
+        const removeButtons = document.querySelectorAll('.remove-item');
+        let itemIdToRemove = null;
         
-        // Helper function to send AJAX request to update cart item
-        function updateCartItem(input) {
-            const productId = input.dataset.productId;
-            const quantity = input.value;
-            
-            // Create form data
-            const formData = new FormData();
-            formData.append('product_id', productId);
-            formData.append('quantity', quantity);
-            
-            // Send AJAX request
-            fetch('/cart/update', {
+        removeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                itemIdToRemove = this.getAttribute('data-item-id');
+                deleteItemModal.show();
+            });
+        });
+        
+        // Confirm delete button in modal
+        document.getElementById('confirmDelete').addEventListener('click', function() {
+            if (itemIdToRemove) {
+                removeCartItem(itemIdToRemove);
+                deleteItemModal.hide();
+            }
+        });
+        
+        // Confirm clear cart button in modal
+        document.getElementById('confirmClearCart').addEventListener('click', function() {
+            fetch('/cart/clear', {
                 method: 'POST',
-                body: formData
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Update subtotal for this item
-                    const cartItem = input.closest('.cart-item');
-                    const subtotalElement = cartItem.querySelector('.product-subtotal');
-                    subtotalElement.textContent = data.item_subtotal;
-                    
-                    // Update cart totals
-                    const summaryItems = document.querySelectorAll('.summary-value');
-                    summaryItems[0].textContent = data.cart_subtotal;  // Subtotal
-                    summaryItems[summaryItems.length - 2].textContent = data.shipping_fee;  // Shipping
-                    summaryItems[summaryItems.length - 1].textContent = data.cart_total;  // Total
-                    
-                    // Update cart count in header
-                    const cartCountEl = document.querySelector('.cart-count');
-                    if (cartCountEl) {
-                        cartCountEl.textContent = data.cart_count;
-                    }
+                    window.location.reload();
                 } else {
-                    // Show error message
-                    alert('Có lỗi xảy ra khi cập nhật giỏ hàng. Vui lòng thử lại.');
+                    showNotification(data.message || 'Failed to clear cart', 'danger');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Có lỗi xảy ra khi cập nhật giỏ hàng. Vui lòng thử lại.');
+                showNotification('An error occurred. Please try again.', 'danger');
             });
-        }
+            
+            clearCartModal.hide();
+        });
     });
+    
+    function updateCartItem(itemId, quantity) {
+        fetch('/cart/update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: `item_id=${itemId}&quantity=${quantity}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update item total
+                if (data.itemTotal) {
+                    document.getElementById('item-total-' + itemId).textContent = data.itemTotal;
+                }
+                
+                // Update cart subtotal
+                if (data.subtotal) {
+                    document.getElementById('cart-subtotal').textContent = data.subtotal;
+                }
+                
+                // Update cart total
+                if (data.total) {
+                    document.getElementById('cart-total').textContent = data.total;
+                }
+            } else {
+                showNotification(data.message || 'Failed to update cart', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('An error occurred. Please try again.', 'danger');
+        });
+    }
+    
+    function removeCartItem(itemId) {
+        fetch('/cart/remove', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: `item_id=${itemId}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                showNotification(data.message || 'Failed to remove item', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('An error occurred. Please try again.', 'danger');
+        });
+    }
+    
+    function clearCart() {
+        const clearCartModal = new bootstrap.Modal(document.getElementById('clearCartModal'));
+        clearCartModal.show();
+    }
+    
+    function applyCoupon() {
+        const couponCode = document.getElementById('couponCode').value.trim();
+        const couponMessage = document.getElementById('couponMessage');
+        
+        if (!couponCode) {
+            couponMessage.className = 'form-text text-danger';
+            couponMessage.textContent = 'Please enter a coupon code';
+            return;
+        }
+        
+        fetch('/cart/apply-coupon', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: `coupon_code=${couponCode}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                couponMessage.className = 'form-text text-success';
+                couponMessage.textContent = data.message || 'Coupon applied successfully!';
+                
+                // Update cart totals
+                document.getElementById('cart-subtotal').textContent = data.subtotal;
+                document.getElementById('cart-total').textContent = data.total;
+                
+                // Reload to reflect discount
+                window.location.reload();
+            } else {
+                couponMessage.className = 'form-text text-danger';
+                couponMessage.textContent = data.message || 'Invalid coupon code';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            couponMessage.className = 'form-text text-danger';
+            couponMessage.textContent = 'An error occurred. Please try again.';
+        });
+    }
 </script>
 
 <style>

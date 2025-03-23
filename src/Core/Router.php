@@ -3,57 +3,185 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+/**
+ * Router Class
+ * 
+ * Handles URL routing and dispatching to controllers
+ */
 class Router
 {
-    private array $routes = [
-        'GET' => [
-            '/' => ['controller' => 'ProductController', 'action' => 'index'],
-            '/products' => ['controller' => 'ProductController', 'action' => 'index'],
-            '/product' => ['controller' => 'ProductController', 'action' => 'show'],
-            '/cart' => ['controller' => 'CartController', 'action' => 'index'],
-        ],
-        'POST' => [
-            '/cart/add' => ['controller' => 'CartController', 'action' => 'add'],
-            '/cart/remove' => ['controller' => 'CartController', 'action' => 'remove'],
-        ]
-    ];
-
-    public function route(string $uri, string $method): void
+    /**
+     * @var array Array of registered routes
+     */
+    private $routes = [];
+    
+    /**
+     * @var Request Request instance
+     */
+    private $request;
+    
+    /**
+     * @var Response Response instance
+     */
+    private $response;
+    
+    /**
+     * Constructor
+     * 
+     * @param Request $request Request instance
+     * @param Response $response Response instance
+     */
+    public function __construct(Request $request, Response $response)
     {
-        // Remove base path from URI if needed
-        $basePathArray = explode('/', $_SERVER['SCRIPT_NAME']);
-        array_pop($basePathArray); // Remove index.php
-        $basePath = implode('/', $basePathArray);
-        $uri = str_replace($basePath, '', $uri);
-        
-        // Split URI into parts
-        $uriParts = explode('?', $uri);
-        $uri = $uriParts[0];
-        
-        // Normalize URI (remove trailing slashes except for root)
-        if ($uri !== '/' && substr($uri, -1) === '/') {
-            $uri = rtrim($uri, '/');
-        }
-        
-        // Check if route exists
-        if (isset($this->routes[$method][$uri])) {
-            $route = $this->routes[$method][$uri];
-            $controllerName = "\\App\\Controllers\\{$route['controller']}";
-            $action = $route['action'];
-            
-            $controller = new $controllerName();
-            $controller->$action();
-            return;
-        }
-        
-        // Route not found
-        $this->notFound();
+        $this->request = $request;
+        $this->response = $response;
     }
     
-    private function notFound(): void
+    /**
+     * Register a GET route
+     * 
+     * @param string $path The route path
+     * @param mixed $callback The callback to execute
+     */
+    public function get($path, $callback)
     {
-        http_response_code(404);
-        require VIEW_PATH . '/layouts/404.php';
-        exit;
+        $this->routes['get'][$path] = $callback;
+    }
+    
+    /**
+     * Register a POST route
+     * 
+     * @param string $path The route path
+     * @param mixed $callback The callback to execute
+     */
+    public function post($path, $callback)
+    {
+        $this->routes['post'][$path] = $callback;
+    }
+    
+    /**
+     * Register a PUT route
+     * 
+     * @param string $path The route path
+     * @param mixed $callback The callback to execute
+     */
+    public function put($path, $callback)
+    {
+        $this->routes['put'][$path] = $callback;
+    }
+    
+    /**
+     * Register a DELETE route
+     * 
+     * @param string $path The route path
+     * @param mixed $callback The callback to execute
+     */
+    public function delete($path, $callback)
+    {
+        $this->routes['delete'][$path] = $callback;
+    }
+    
+    /**
+     * Resolve the current route
+     * 
+     * Find and execute the appropriate callback for the current request
+     * 
+     * @throws RouteNotFoundException When route is not found
+     */
+    public function resolve()
+    {
+        $method = $this->request->getMethod();
+        $path = $this->request->getPath();
+        $callback = $this->findRoute($method, $path);
+        
+        if ($callback === false) {
+            throw new RouteNotFoundException("Route {$path} not found", 404);
+        }
+        
+        if (is_string($callback)) {
+            return $this->callControllerAction($callback);
+        }
+        
+        return call_user_func($callback, $this->request, $this->response);
+    }
+    
+    /**
+     * Find a registered route that matches the given method and path
+     * 
+     * @param string $method The HTTP method
+     * @param string $path The route path
+     * @return mixed The callback for the route or false if not found
+     */
+    private function findRoute($method, $path)
+    {
+        $method = strtolower($method);
+        
+        if (!isset($this->routes[$method])) {
+            return false;
+        }
+        
+        // Check for exact match
+        if (isset($this->routes[$method][$path])) {
+            return $this->routes[$method][$path];
+        }
+        
+        // Check for route with parameters
+        foreach ($this->routes[$method] as $route => $callback) {
+            $pattern = $this->convertRouteToRegex($route);
+            if (preg_match($pattern, $path, $matches)) {
+                array_shift($matches);
+                $this->request->setRouteParams($matches);
+                return $callback;
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Convert a route pattern to a regular expression
+     * 
+     * @param string $route The route pattern
+     * @return string The regular expression
+     */
+    private function convertRouteToRegex($route)
+    {
+        if (strpos($route, '{') === false) {
+            return "#^" . $route . "$#";
+        }
+        
+        $route = preg_replace('/{([a-zA-Z0-9_]+)}/', '([^/]+)', $route);
+        return "#^" . $route . "$#";
+    }
+    
+    /**
+     * Call a controller action
+     * 
+     * @param string $callback The controller action in format "Controller@action"
+     * @return mixed The result of the controller action
+     * @throws \Exception If controller or action not found
+     */
+    private function callControllerAction($callback)
+    {
+        [$controller, $action] = explode('@', $callback);
+        
+        if (strpos($controller, '\\') === false) {
+            $controller = "\\App\\Controllers\\{$controller}";
+        } else {
+            $controller = "\\App\\Controllers\\{$controller}";
+        }
+        
+        if (!class_exists($controller)) {
+            throw new \Exception("Controller {$controller} not found");
+        }
+        
+        $controllerInstance = new $controller();
+        
+        if (!method_exists($controllerInstance, $action)) {
+            throw new \Exception("Action {$action} not found in controller {$controller}");
+        }
+        
+        $params = $this->request->getRouteParams();
+        return call_user_func_array([$controllerInstance, $action], $params);
     }
 } 

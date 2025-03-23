@@ -12,68 +12,71 @@ use PDO;
 
 class ProductService
 {
-    private $db;
+    private Database $db;
     private $categoryService;
 
     public function __construct()
     {
-        $this->db = \App\Config\Database::getInstance()->getConnection();
+        $this->db = new Database();
         $this->categoryService = new CategoryService();
     }
 
     /**
      * Get products with optional filtering and pagination
      * 
-     * @param int|null $categoryId Filter by category ID
-     * @param string $sort Field to sort by
-     * @param string $sortDirection Sort direction ('ASC' or 'DESC')
+     * @param string $search Search term
+     * @param int $categoryId Filter by category ID
+     * @param string $sortBy Sort by field
      * @param int $page Page number
-     * @param int $limit Products per page
+     * @param int $perPage Products per page
      * @return array Array of products
      */
     public function getProducts(
-        ?int $categoryId = null,
-        string $sort = 'id',
-        string $sortDirection = 'ASC',
-        int $page = 1,
-        int $limit = 12
+        string $search = '', 
+        int $categoryId = 0, 
+        string $sortBy = 'newest', 
+        int $page = 1, 
+        int $perPage = 12
     ): array {
-        try {
-            $query = "SELECT p.*, c.name AS category_name 
-                     FROM products p
-                     LEFT JOIN categories c ON p.category_id = c.id";
-            
-            $params = [];
-            
-            // Add category filter if provided
-            if ($categoryId !== null) {
-                $query .= " WHERE p.category_id = ?";
-                $params[] = $categoryId;
-            }
-            
-            // Add sorting
-            $allowedSortFields = ['id', 'name', 'price', 'created_at'];
-            $sort = in_array($sort, $allowedSortFields) ? $sort : 'id';
-            $sortDirection = strtoupper($sortDirection) === 'DESC' ? 'DESC' : 'ASC';
-            
-            $query .= " ORDER BY p.$sort $sortDirection";
-            
-            // Add pagination
-            $offset = ($page - 1) * $limit;
-            $query .= " LIMIT ?, ?";
-            $params[] = (int)$offset;
-            $params[] = (int)$limit;
-            
-            $stmt = $this->db->prepare($query);
-            $stmt->execute($params);
-            
-            $products = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-            
-            return !empty($products) ? $products : [];
-        } catch (\PDOException $e) {
-            // For demo purposes, return placeholder products
-            return [];
+        $params = [];
+        $sql = "SELECT p.*, c.name as category_name 
+                FROM products p
+                LEFT JOIN categories c ON p.category_id = c.id
+                WHERE p.status = 'active'";
+
+        if (!empty($search)) {
+            $sql .= " AND (p.name LIKE ? OR p.description LIKE ?)";
+            $params[] = "%{$search}%";
+            $params[] = "%{$search}%";
         }
+
+        if ($categoryId > 0) {
+            $sql .= " AND p.category_id = ?";
+            $params[] = $categoryId;
+        }
+
+        switch ($sortBy) {
+            case 'price_low':
+                $sql .= " ORDER BY p.price ASC";
+                break;
+            case 'price_high':
+                $sql .= " ORDER BY p.price DESC";
+                break;
+            case 'name':
+                $sql .= " ORDER BY p.name ASC";
+                break;
+            case 'newest':
+            default:
+                $sql .= " ORDER BY p.created_at DESC";
+                break;
+        }
+
+        $offset = ($page - 1) * $perPage;
+        $sql .= " LIMIT ?, ?";
+        $params[] = $offset;
+        $params[] = $perPage;
+
+        return $this->db->query($sql, $params);
     }
 
     /**
@@ -84,29 +87,313 @@ class ProductService
      */
     public function getProductById(int $id): ?array
     {
-        try {
-            $stmt = $this->db->prepare("SELECT p.*, c.name AS category_name 
-                                        FROM products p 
-                                        LEFT JOIN categories c ON p.category_id = c.id 
-                                        WHERE p.id = ?");
-            $stmt->execute([$id]);
-            
-            $product = $stmt->fetch(\PDO::FETCH_ASSOC);
-            
-            return $product ?: null;
-        } catch (\PDOException $e) {
-            return null;
-        }
+        $sql = "SELECT p.*, c.name as category_name 
+                FROM products p
+                LEFT JOIN categories c ON p.category_id = c.id
+                WHERE p.id = ?";
+
+        $products = $this->db->query($sql, [$id]);
+        
+        return $products[0] ?? null;
     }
 
     /**
      * Get related products for a given product
      * 
      * @param int $productId Current product ID
+     * @param int $categoryId Related category ID
      * @param int $limit Maximum number of related products
      * @return array Array of related products
      */
-    public function getRelatedProducts(int $productId, int $limit = 4): array
+    public function getRelatedProducts(int $productId, int $categoryId, int $limit = 4): array
+    {
+        $sql = "SELECT * FROM products 
+                WHERE status = 'active' 
+                AND id != ? 
+                AND category_id = ?
+                ORDER BY RAND() 
+                LIMIT ?";
+
+        return $this->db->query($sql, [$productId, $categoryId, $limit]);
+    }
+
+    /**
+     * Get featured products
+     * 
+     * @param int $limit Maximum number of featured products
+     * @return array Array of featured products
+     */
+    public function getFeaturedProducts(int $limit = 8): array
+    {
+        $sql = "SELECT p.*, c.name as category_name 
+                FROM products p
+                LEFT JOIN categories c ON p.category_id = c.id
+                WHERE p.status = 'active' AND p.is_featured = 1
+                ORDER BY p.created_at DESC
+                LIMIT ?";
+
+        return $this->db->query($sql, [$limit]);
+    }
+
+    /**
+     * Get new arrivals
+     * 
+     * @param int $limit Maximum number of new arrivals
+     * @return array Array of new arrivals
+     */
+    public function getNewArrivals(int $limit = 8): array
+    {
+        $sql = "SELECT p.*, c.name as category_name 
+                FROM products p
+                LEFT JOIN categories c ON p.category_id = c.id
+                WHERE p.status = 'active'
+                ORDER BY p.created_at DESC
+                LIMIT ?";
+
+        return $this->db->query($sql, [$limit]);
+    }
+
+    /**
+     * Get popular products
+     * 
+     * @param int $limit Maximum number of popular products
+     * @return array Array of popular products
+     */
+    public function getPopularProducts(int $limit = 8): array
+    {
+        $sql = "SELECT p.*, c.name as category_name 
+                FROM products p
+                LEFT JOIN categories c ON p.category_id = c.id
+                WHERE p.status = 'active'
+                ORDER BY p.sales_count DESC
+                LIMIT ?";
+
+        return $this->db->query($sql, [$limit]);
+    }
+
+    /**
+     * Get admin products
+     * 
+     * @param string $search Search term
+     * @param int $page Page number
+     * @param int $perPage Products per page
+     * @return array Array of admin products
+     */
+    public function getAdminProducts(string $search = '', int $page = 1, int $perPage = 10): array
+    {
+        $params = [];
+        $sql = "SELECT p.*, c.name as category_name 
+                FROM products p
+                LEFT JOIN categories c ON p.category_id = c.id";
+
+        if (!empty($search)) {
+            $sql .= " WHERE p.name LIKE ? OR p.description LIKE ?";
+            $params[] = "%{$search}%";
+            $params[] = "%{$search}%";
+        }
+
+        $sql .= " ORDER BY p.id DESC";
+
+        $offset = ($page - 1) * $perPage;
+        $sql .= " LIMIT ?, ?";
+        $params[] = $offset;
+        $params[] = $perPage;
+
+        return $this->db->query($sql, $params);
+    }
+
+    /**
+     * Get admin product count
+     * 
+     * @param string $search Search term
+     * @return int Total admin products count
+     */
+    public function getAdminProductCount(string $search = ''): int
+    {
+        $params = [];
+        $sql = "SELECT COUNT(*) as count FROM products";
+
+        if (!empty($search)) {
+            $sql .= " WHERE name LIKE ? OR description LIKE ?";
+            $params[] = "%{$search}%";
+            $params[] = "%{$search}%";
+        }
+
+        $result = $this->db->query($sql, $params);
+        return (int)($result[0]['count'] ?? 0);
+    }
+
+    /**
+     * Create a new product
+     * 
+     * @param string $name Product name
+     * @param string $description Product description
+     * @param string $shortDescription Product short description
+     * @param float $price Product price
+     * @param ?float $salePrice Product sale price
+     * @param string $image Product image
+     * @param int $stock Product stock
+     * @param int $categoryId Product category ID
+     * @param string $status Product status
+     * @param int $isFeatured Product featured status
+     * @return int Inserted product ID
+     */
+    public function createProduct(
+        string $name,
+        string $description,
+        string $shortDescription,
+        float $price,
+        ?float $salePrice,
+        string $image,
+        int $stock,
+        int $categoryId,
+        string $status = 'active',
+        int $isFeatured = 0
+    ): int {
+        $sql = "INSERT INTO products (
+                    name, description, short_description, price, sale_price, 
+                    image, stock, category_id, status, is_featured, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+
+        $params = [
+            $name, $description, $shortDescription, $price, $salePrice,
+            $image, $stock, $categoryId, $status, $isFeatured
+        ];
+
+        return $this->db->insert($sql, $params);
+    }
+
+    /**
+     * Update an existing product
+     * 
+     * @param int $productId Product ID
+     * @param string $name Product name
+     * @param string $description Product description
+     * @param string $shortDescription Product short description
+     * @param float $price Product price
+     * @param ?float $salePrice Product sale price
+     * @param string $image Product image
+     * @param int $stock Product stock
+     * @param int $categoryId Product category ID
+     * @param string $status Product status
+     * @param int $isFeatured Product featured status
+     * @return bool True if update was successful, false otherwise
+     */
+    public function updateProduct(
+        int $productId,
+        string $name,
+        string $description,
+        string $shortDescription,
+        float $price,
+        ?float $salePrice,
+        string $image,
+        int $stock,
+        int $categoryId,
+        string $status = 'active',
+        int $isFeatured = 0
+    ): bool {
+        $sql = "UPDATE products SET
+                    name = ?, description = ?, short_description = ?, price = ?, 
+                    sale_price = ?, image = ?, stock = ?, category_id = ?, 
+                    status = ?, is_featured = ?, updated_at = NOW()
+                WHERE id = ?";
+
+        $params = [
+            $name, $description, $shortDescription, $price, $salePrice,
+            $image, $stock, $categoryId, $status, $isFeatured, $productId
+        ];
+
+        return $this->db->execute($sql, $params);
+    }
+
+    /**
+     * Delete a product
+     * 
+     * @param int $productId Product ID
+     * @return bool True if deletion was successful, false otherwise
+     */
+    public function deleteProduct(int $productId): bool
+    {
+        $sql = "DELETE FROM products WHERE id = ?";
+        return $this->db->execute($sql, [$productId]);
+    }
+
+    /**
+     * Update product stock
+     * 
+     * @param int $productId Product ID
+     * @param int $quantity Quantity to subtract from stock
+     * @return bool True if stock update was successful, false otherwise
+     */
+    public function updateStock(int $productId, int $quantity): bool
+    {
+        $sql = "UPDATE products SET stock = stock - ? WHERE id = ?";
+        return $this->db->execute($sql, [$quantity, $productId]);
+    }
+
+    /**
+     * Increment product sales count
+     * 
+     * @param int $productId Product ID
+     * @param int $quantity Quantity to add to sales count
+     * @return bool True if sales count update was successful, false otherwise
+     */
+    public function incrementSalesCount(int $productId, int $quantity = 1): bool
+    {
+        $sql = "UPDATE products SET sales_count = sales_count + ? WHERE id = ?";
+        return $this->db->execute($sql, [$quantity, $productId]);
+    }
+
+    /**
+     * Get product count
+     * 
+     * @param string $search Search term
+     * @param int $categoryId Filter by category ID
+     * @return int Total products count
+     */
+    public function getProductCount(string $search = '', int $categoryId = 0): int
+    {
+        $params = [];
+        $sql = "SELECT COUNT(*) as count FROM products WHERE status = 'active'";
+
+        if (!empty($search)) {
+            $sql .= " AND (name LIKE ? OR description LIKE ?)";
+            $params[] = "%{$search}%";
+            $params[] = "%{$search}%";
+        }
+
+        if ($categoryId > 0) {
+            $sql .= " AND category_id = ?";
+            $params[] = $categoryId;
+        }
+
+        $result = $this->db->query($sql, $params);
+        return (int)($result[0]['count'] ?? 0);
+    }
+
+    public function getAllProducts(string $sortBy = 'name', string $sortDirection = 'asc', int $page = 1, int $perPage = 9): array
+    {
+        $offset = ($page - 1) * $perPage;
+        
+        // Validate sort parameters to prevent SQL injection
+        $allowedSortFields = ['name', 'price', 'category_id'];
+        $sortBy = in_array($sortBy, $allowedSortFields) ? $sortBy : 'name';
+        
+        $sortDirection = strtolower($sortDirection) === 'desc' ? 'DESC' : 'ASC';
+        
+        $stmt = $this->db->prepare("SELECT p.*, c.name AS category_name 
+                                   FROM products p 
+                                   LEFT JOIN categories c ON p.category_id = c.id 
+                                   ORDER BY p.{$sortBy} {$sortDirection} 
+                                   LIMIT :limit OFFSET :offset");
+        $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    public function getCategoryCount(string $category): int
     {
         try {
             // Get current product
